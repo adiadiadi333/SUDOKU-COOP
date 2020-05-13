@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SUDOKU LOBBY</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="notes.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="nav.css"/>
+    <style>
+        *{
+            font-size: 25px;
+            font-weight: 400;
+            font-family: Georgia, serif;
+        }
+        h1{
+            background: linear-gradient(to bottom, rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
+            text-align:center;
+            text-decoration: none solid rgb(68, 68, 68);
+            font-size: 40px;
+            letter-spacing: 3.8px;
+            word-spacing: 5.6px;
+            color: #000000;
+            text-transform: none;
+        }
+        body{
+            text-align: center;
+            background: url("https://www.sleepdr.com/wp-content/uploads/2017/03/what-is-cpap-rainout.jpg");
+        //background-image: url("https://media.giphy.com/media/t7Qb8655Z1VfBGr5XB/giphy.gif");
+            background-size: cover;
+        }
+        .table{
+            border-collapse: collapse;
+            border-spacing: 0;
+            empty-cells: show;
+            border: 1px solid #cbcbcb;
+            color: #000;
+            padding: 1em 0;
+            text-align: center;
+            font-size: 35px;
+        }
+        .table td, .table th {
+            border-left: 1px solid #cbcbcb;/*  inner column border */
+            font-size: inherit;
+            margin: 0;
+            overflow: visible; /*to make ths where the title is really long work*/
+            padding: 0.5em 1em; /* cell padding */
+        }
+
+        .table thead {
+            background:linear-gradient(to bottom, rgba(206,219,233,1) 0%,rgba(170,197,222,1) 17%,rgba(97,153,199,1) 50%,rgba(58,132,195,1) 51%,rgba(65,154,214,1) 59%,rgba(75,184,240,1) 71%,rgba(58,139,194,1) 84%,rgba(38,85,139,1) 100%);
+            color: #000;
+            text-align: left;
+            vertical-align: bottom;
+        }
+        .table tr:nth-child(2n-1) td {
+            background:linear-gradient(to bottom, rgba(230,240,163,1) 0%,rgba(210,230,56,1) 50%,rgba(195,216,37,1) 51%,rgba(219,240,67,1) 100%);
+        }
+        .table tr:nth-child(2n) td {
+            background: linear-gradient(to bottom, rgba(252,234,187,1) 0%,rgba(252,205,77,1) 50%,rgba(248,181,0,1) 51%,rgba(251,223,147,1) 100%);
+        }
+        .table td {
+            border-bottom: 1px solid #cbcbcb;
+        }
+        .table tbody > tr:last-child > td {
+            border-bottom-width: 0;
+        }
+        .table tr:hover td {
+            background: linear-gradient(to bottom, rgba(246,248,249,1) 0%,rgba(229,235,238,1) 50%,rgba(215,222,227,1) 51%,rgba(245,247,249,1) 100%);
+        }
+        .join {
+            box-shadow: 0 0 19px 3px #00cfbe;
+            background: #bfbf24 linear-gradient(to bottom, #bfbf24 5%, #5cbf2a 100%);
+            display:inline-block;
+            cursor:pointer;
+            color:#ffffff;
+            font-size:20px;
+            padding:11px 14px;
+            text-decoration:none;
+        }
+        .join:hover {
+            background: #5cbf2a linear-gradient(to bottom, #5cbf2a 5%, #bfbf24 100%);
+        }
+        .join:active {
+            position:relative;
+            top:1px;
+        }
+        #table-scroll {
+            text-align: center;
+            height:600px;
+            overflow:auto;
+            margin-top:20px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #table-wrapper{
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+            display: inline-block;
+        }
+        button {
+            margin: 0 auto;
+            box-shadow: 0 9px 26px 18px #57ff29;
+            background: #ff0000 linear-gradient(to bottom, #ff0000 5%, #e3b600 100%);
+            display:block;
+            cursor:pointer;
+            color:#ffffff;
+            font-size:28px;
+            font-weight: 400;
+            padding:17px 18px;
+            text-decoration:none;
+        }
+        button:hover {
+            background: #e3b600 linear-gradient(to bottom, #e3b600 5%, #ff0000 100%);
+            text-shadow:0 -1px 7px #ffffff;
+        }
+        #create,#search,#difficulties button{
+            display: inline-block;
+            margin-left: 50px;
+            margin-right: 50px;
+        }
+        #difficulties button{
+            font-size: 22px;
+            margin-right: 20px;
+            margin-left: 20px;
+        }
+        #creators,#difficulties{
+            padding: 15px;
+        }
+        #difficulties{
+            display: none;
+        }
+        #searchbox{
+            padding: 10px;
+            display: inline-block;
+        }
+        #searcher button{
+            display: inline-block;
+        }
+        #searcher{
+            display: none;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-database.js"></script>
+</head>
+<body>
+<div class="topnav">
+    <%if(logged){%>
+    <a href="welcome">Welcome, <%=pname%></a>
+    <a href="logout">LogOut</a>
+    <a href="help">Tutorial and FAQ</a>
+    <a class="active" href="lobby">Play with friends</a>
+    <a href="solo">Play Solo</a>
+    <%}else{%>
+    <a href="welcome">Home</a>
+    <a href="login.html">LogIn</a>
+    <a href="signup.html">SignUp</a>
+    <a href="help">Tutorial and FAQ</a>
+    <a href="lobby" class="active">Play Online as Guest</a>
+    <a href="solo">Play Solo as Guest</a>
+    <%}%>
+</div>
+<h1>SUDOKU LOBBIES</h1>
+<div id="creators">
+    <button id="create">CREATE</button>
+    <button id="search">SEARCH</button>
+</div>
+<div id="customizers">
+    <div id="difficulties">
+        <button id="easy">easy</button>
+        <button id="medium">medium</button>
+        <button id="hard">hard</button>
+    </div>
+    <div id="searcher">
+        <input id="searchbox" type="text" placeholder="search...">
+        <button id="execsearch"><i class="fa fa-search"></i></button>
+    </div>
+    <span id="creatnot" class="success">lobby has been created!</span>
+    <span id="fnot" class="success"></span>
+    <span id="nfnot" class="error">lobby doesnt exist!</span>
+</div>
+<div id="table-wrapper">
+    <div id="table-scroll">
+        <table id="tableLobby" class="table">
+            <thead>
+            <tr>
+                <th>id</th>
+                <th>difficulty</th>
+                <th>players</th>
+                <th>time elapsed</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody id="lobbydata"></tbody>
+        </table>
+    </div>
+</div>
+</body>
+<script>
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyB9Gj86aRbyt-Xqla7xCJJxPDl_Uz0FTqA",
+        authDomain: "sudoku-333.firebaseapp.com",
+        databaseURL: "https://sudoku-333.firebaseio.com",
+        projectId: "sudoku-333",
+        storageBucket: "sudoku-333.appspot.com",
+        messagingSenderId: "631668838127",
+        appId: "1:631668838127:web:487a428a1958e27f7b551a",
+        measurementId: "G-6KJBJVDGC8"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    var ref = firebase.database().ref("lobbies");
+    ref.on("value",function (snap) {
+        let tl = document.getElementById("lobbydata");
+        tl.innerHTML = "";
+        snap.forEach(function (childsnap) {
+            if(childsnap.hasChild("puzzle")) {
+                let rowstr = "";
+                rowstr += "<tr>";
+                rowstr += "<td>" + childsnap.key.substr(3) + "</td>";
+                rowstr += "<td>" + childsnap.child("difficulty").val() + "</td>";
+                let n = childsnap.child("players").exists() ? childsnap.child("players").numChildren() : 0;
+                rowstr += "<td>" + n + "</td>";
+                rowstr += "<td>" + dtostr(Date.now() - parseInt(childsnap.child("starttime").val())) + "</td>";
+                rowstr += "<td><a href=" + childsnap.key.substr(3) + " class='join'>JOIN</a></td>";
+                rowstr += "</tr>";
+                tl.innerHTML += rowstr;
+            }
+        });
+    });
+    function httpGetAsync(theUrl, callback) {
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function() {
+            if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                callback(xmlHttp.responseText);
+        };
+        xmlHttp.open("GET", theUrl, true); // true for asynchronous
+        xmlHttp.send(null);
+    }
+    function dtostr(msec) {
+        var hh = Math.floor(msec / 1000 / 60 / 60);
+        msec -= hh * 1000 * 60 * 60;
+        var mm = Math.floor(msec / 1000 / 60);
+        msec -= mm * 1000 * 60;
+        var ss = Math.floor(msec / 1000);
+        msec -= ss * 1000;
+        return hh + ":" + mm + ":" + ss;
+    }
+    function clearallmsg(){
+        document.getElementById("searcher").style.display = "none";
+        document.getElementById("difficulties").style.display = "none";
+        document.getElementById("creatnot").style.display = "none";
+        document.getElementById("fnot").style.display = "none";
+        document.getElementById("nfnot").style.display = "none";
+    }
+
+    document.getElementById("create").onclick = function () {
+        clearallmsg();
+        document.getElementById("difficulties").style.display = "block";
+    };
+    document.getElementById("difficulties").addEventListener("click",function (event) {
+        clearallmsg();
+        if(event.target.tagName === "BUTTON"){
+            fetch("http://localhost:8162/makelobby"+event.target.id)
+                .then(function (res) {return res;})
+                .then(function (data) {return data.text();})
+                .then(function (str) {
+                    document.getElementById("creatnot").innerHTML = str;
+                    document.getElementById("creatnot").style.display = "block";
+                })
+        }
+    });
+    document.getElementById("search").onclick = function () {
+        clearallmsg();
+        document.getElementById("searcher").style.display = "block";
+    };
+    document.getElementById("execsearch").onclick = function () {
+        clearallmsg();
+        let key = document.getElementById("searchbox").value;
+        if(!key.match(/\b\d{5}\b/)){
+            clearallmsg();
+            document.getElementById("nfnot").style.display = "block";
+            return;
+        }
+        ref.once("value").then(function (snap) {
+            if(snap.hasChild("lob"+key)){
+                clearallmsg();
+                document.getElementById("fnot").innerHTML = "lobby found <a href="+key+">~click~</a> to join";
+                document.getElementById("fnot").style.display = "block";
+            }else{
+                clearallmsg();
+                document.getElementById("nfnot").style.display = "block";
+            }
+        });
+    }
+</script>
+</html>

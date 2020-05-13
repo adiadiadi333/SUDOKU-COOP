@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Welcome to Sudoku Online</title>
+    <link rel="stylesheet" href="nav.css"/>
+    <style>
+        body {
+            margin: 0;
+            background-image: url("https://4.bp.blogspot.com/-dXMb3OIPqiw/UV5pkcbDQhI/AAAAAAAACP0/8hPOunZvj7g/s1600/3.jpg");
+        }
+        *{
+            font-weight: 400;
+            font-size: 18px;
+            font-family: Georgia, serif;
+        }
+        h1,h2{
+            background: linear-gradient(to bottom, rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
+            text-align:center;
+            text-decoration: none solid rgb(68, 68, 68);
+            font-size: 40px;
+            letter-spacing: 3.8px;
+            word-spacing: 5.6px;
+            color: #000000;
+            text-transform: none;
+        }
+        h2{
+            font-size: 30px;
+        }
+        a{
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="topnav">
+    <%if(logged){%>
+    <a class="active" href="welcome">Welcome, <%=pname%></a>
+    <a href="logout">LogOut</a>
+    <a href="help">Tutorial and FAQ</a>
+    <a href="lobby">Play with friends</a>
+    <a href="solo">Play Solo</a>
+    <%}else{%>
+    <a class="active" href="welcome">Home</a>
+    <a href="login.html">LogIn</a>
+    <a href="signup.html">SignUp</a>
+    <a href="help">Tutorial and FAQ</a>
+    <a href="lobby">Play Online as Guest</a>
+    <a href="solo">Play Solo as Guest</a>
+    <%}%>
+</div>
+
+<div style="padding-left:16px">
+    <h1>SUDOKU COOP</h1>
+    <p><img src="data:image/jpeg;base64,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" style="width:500px;height:300px;"/></p>
+    <h2>WHAT IS SUDOKU</h2>
+</div>
+<div style="padding-left:16px">
+
+    <p>
+        Sudoku is played on a grid of 9 x 9 spaces. Within the rows and columns are 9 squares (made up of 3 x 3 spaces). Each row, column and square (9 spaces each) needs to be filled out with the numbers 1-9, without repeating any numbers within the row, column or square. Does it sound complicated? As you can see from the image below of an actual Sudoku grid, each Sudoku grid comes with a few spaces already filled in; the more spaces filled in, the easier the game. More difficult Sudoku puzzles have very few spaces that are already filled in.
+    <p>
+
+    <h2>THE RULE OF SUDOKU</h2>
+    <p>While solving Sudoku puzzles can be significant challenge, the rules for traditional solution finding are quite straight forward:<p>
+
+    <ul>
+        <li>Each row, column, and nonet can contain each number (typically 1 to 9) exactly once.</li>
+        <li>The sum of all numbers in any nonet, row, or column must match the small number printed in its corner. For traditional Sudoku puzzles featuring the numbers 1 to 9, this sum is equal to 45.</li></ul>
+    <p>This is an important point to review as it is not uncommon for inexperienced players to get frustrated and to abandon the techniques we will lay out below. Do not do it! In order to solve Sudoku puzzles reliably, you must be disciplined, focused, and patient.<p>
+    <h2>HOW TO SOLVE SUDOKU PUZZLES</h2>
+    <p>There are two main techniques one can use to solve a Sudoku puzzle; Crosshatching and Penciling In. These two techniques are simple, straightforward, reliable, and sufficient in solving most standard Sudoku puzzles.
+
+        It is important to understand that all Sudoku puzzles require an iterative approach. Except for in the case of the most simple puzzles, players will have to visit each nonet more than one time. Fortunately, each successive application of the solution techniques yields more completed cells.<p>
+</div>
+</body>
+</html>

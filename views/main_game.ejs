@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SUDOKU-COOP</title>
+    <link rel="stylesheet" href="nav.css"/>
+    <style type="text/css">
+        *{
+            font-weight: 400;
+            font-size: 18px;
+            font-family: Georgia, serif;
+        }
+        h1,#header,#hidden,h2{
+            background: linear-gradient(to bottom, rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
+            text-align:center;
+            font-family: Georgia, serif;
+            font-size: 40px;
+            letter-spacing: 3.8px;
+            word-spacing: 5.6px;
+            color: #000000;
+            font-weight: 400;
+            text-decoration: none solid rgb(68, 68, 68);
+            font-style: italic;
+            font-variant: small-caps;
+            text-transform: none;
+        }
+        h2{
+            background: none;
+            font-size: 30px;
+        }
+        #header{
+            font-size: 20px;
+        }
+        .board{
+            text-align:center;
+            width:60%;
+            height:100%;
+            background: none;
+            float: left;
+        }
+        #hidden{
+            display:none;
+            background: none;
+        }
+        .controls,#hidden{
+            text-align: center;
+            float: left;
+            width: 35%;
+            margin:0;
+            height: 100%;
+            padding: 2%;
+        }
+        table{
+            background: linear-gradient(to bottom, rgba(206,219,233,1) 0%,rgba(170,197,222,1) 17%,rgba(97,153,199,1) 50%,rgba(58,132,195,1) 51%,rgba(65,154,214,1) 59%,rgba(75,184,240,1) 71%,rgba(58,139,194,1) 84%,rgba(38,85,139,1) 100%);
+            margin:0 auto;
+        }
+        input{
+            background: linear-gradient(to bottom,  rgba(230,240,163,1) 0%,rgba(210,230,56,1) 50%,rgba(195,216,37,1) 51%,rgba(219,240,67,1) 100%);
+            border:0;
+            text-align:center;
+            font-size:24px;
+            font-family: Georgia, serif;
+            width:55px;
+            height:55px;
+            padding: 0;
+        }
+        tr:first-child td {
+            border-top-color: #000000;
+            border-top-width: 5px;
+        }
+        tr:nth-child(3n) td {
+            border-bottom-color: #000000;
+            border-bottom-width: 5px;
+        }
+        td{
+            border: 1px solid grey;
+        }
+        td:first-child {
+            border-left-color: #000000;
+            border-left-width: 5px;
+        }
+        td:nth-child(3n) {
+            border-right-color: #000000;
+            border-right-width: 5px;
+        }
+        input:hover {
+            background: #ffffff;
+        }
+        button {
+            margin: 0 auto;
+            box-shadow: 0px 9px 26px 18px #57ff29;
+            background:linear-gradient(to bottom, #ff0000 5%, #e3b600 100%);
+            background-color:#ff0000;
+            display:block;
+            cursor:pointer;
+            color:#ffffff;
+            font-family: Georgia, serif;
+            font-size:28px;
+            font-style: italic;
+            font-variant: small-caps;
+            font-weight: 400;
+            padding:17px 18px;
+            text-decoration:none;
+        }
+        button:hover {
+            background:linear-gradient(to bottom, #e3b600 5%, #ff0000 100%);
+            background-color:#e3b600;
+            text-shadow:0px -1px 7px #ffffff;
+        }
+        button:active {
+            position:relative;
+            top:1px;
+        }
+        .chat-popup{
+            padding: 2%;
+            background: linear-gradient(to bottom, rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
+            display: none;
+            position: fixed;
+            bottom: 0;
+            right: 15px;
+            border: 3px solid #f1f1f1;
+            z-index: 9;
+            max-height: 100%;
+            overflow: visible;
+        }
+        .chat-popup button{
+            font-size: 20px;
+            text-align: center;
+        }
+        #chatboard{
+            background: linear-gradient(to bottom, rgba(255,255,255,1) 0%,rgba(243,243,243,1) 50%,rgba(237,237,237,1) 51%,rgba(255,255,255,1) 100%) ;
+            text-align: left;
+            height: auto;
+            font-family: Georgia, serif;
+            font-size:25px;
+            font-style: italic;
+            font-weight: 400;
+            padding: 2%;
+            max-height: 400px;
+            overflow: scroll;
+        }
+        #send{
+            display: inline-block;
+            margin: 5%;
+        }
+        #close{
+            display: inline-block;
+            margin: 5%;
+        }
+        #chatcontrols{
+            text-align: center;
+        }
+        textarea{
+            display: block;
+            font-family: Georgia, serif;
+            font-size:25px;
+            font-style: italic;
+            font-weight: 400;
+            resize: none;
+        }
+        #difficulties button{
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+    </style>
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-database.js"></script>
+    <script src="tinycolor.js"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB9Gj86aRbyt-Xqla7xCJJxPDl_Uz0FTqA",
+            authDomain: "sudoku-333.firebaseapp.com",
+            databaseURL: "https://sudoku-333.firebaseio.com",
+            projectId: "sudoku-333",
+            storageBucket: "sudoku-333.appspot.com",
+            messagingSenderId: "631668838127",
+            appId: "1:631668838127:web:487a428a1958e27f7b551a",
+            measurementId: "G-6KJBJVDGC8"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        let state = Array(81);
+        let orig = Array(81);
+        let players = {};
+        let start = 0;
+        let stop = 0;
+        let curval = ".";
+        let curcell = "1";
+        let locks = [];
+        let timer = 0;
+
+        var nref = firebase.database().ref("lobbies"); //THIS IS DYNAMIC!!
+        nref.on("value",function (snap) {
+            document.getElementById("header").innerHTML="Currently "+snap.numChildren()+" lobbies in play<br>This lobby id:<%=lobid%>";
+        });
+
+        var plref = firebase.database().ref("lobbies/lob<%=lobid%>/players");
+        plref.on("value",function (snap) {
+            render();
+            snap.forEach(function (childsnap) {
+                if(childsnap.val()!="0") {
+                    document.getElementById(childsnap.val() + "").style.background = childsnap.key;
+                    console.log("player" + childsnap.key + ":" + childsnap.val());
+                }
+            });
+            console.log("pointers loaded");
+        });
+
+        var tref = firebase.database().ref("lobbies/lob<%=lobid%>/starttime");
+        tref.on("value",function (snap) {
+            start = snap.val();
+            console.log("db time:"+start);
+            console.log("now:"+Date.now());
+        });
+
+        var pref = firebase.database().ref("lobbies/lob<%=lobid%>/perzle"); //THIS IS DYNAMIC!!
+        pref.on("value",function (snap) {
+            locks = [];
+            orig=snap.val();
+            for(let i=0;i<81;i++){
+                if(orig.charAt(i)!=="."){
+                    locks.push(i);
+                }
+            }console.log(locks);
+            render();
+            document.getElementById("hidden").style.display="none";
+            document.getElementById("controller").style.display="block";
+        });
+
+        var ref = firebase.database().ref("lobbies/lob<%=lobid%>/puzzle"); //THIS IS DYNAMIC!!
+        ref.on("value",function (snap) {
+            if(!snap.exists()){
+                location.href = "http://localhost:8162/lobby";
+                return;
+            }
+            state=snap.val().split("");
+            render();
+        });
+
+        var sttref =  firebase.database().ref("lobbies/lob<%=lobid%>/stoptime");
+        sttref.on("value",function (snap) {
+            stop = snap.val();
+        });
+
+        var stref = firebase.database().ref("lobbies/lob<%=lobid%>/status");
+        stref.on("value",function (snap) {
+            if(snap.val()==="finished" && timer!==0){
+                document.getElementById("hidden").style.display="block";
+                document.getElementById("controller").style.display = "none";
+                clearInterval(timer);
+                timer = 0;
+                document.getElementById("fin").innerHTML="solved in "+dtostr(stop-start);
+            }else{
+                timer = setInterval(timeIt,1000);
+            }
+        });
+
+        var cref = firebase.database().ref("lobbies/lob<%=lobid%>/chat");
+        cref.on("value",function (snap) {
+            console.log("chat updated");
+            let cb = document.getElementById("chatboard");
+            if(cb===null){return;}
+            cb.innerHTML+=snap.val();
+        });
+        cref.set("<span style='color: dark grey; font-size:20px'><span style='color: <%=pcol%>'><%= pname %></span> has joined the chat</span><br>");
+
+        timer = setInterval(timeIt,1000);
+
+        //UTILILTY FUNCTIONS
+        function to_grid(board_string){
+            var rows = [];
+            var cur_row = [];
+            for(var i in board_string){
+                cur_row.push(board_string[i]);
+                if(i % 9 == 8){
+                    rows.push(cur_row);
+                    cur_row = [];
+                }
+            }
+            return rows;
+        }
+        const checkSudoku = board => {
+            const isSudokuArrayValid = (array) => {
+                const row = array.slice(0).sort().join(''),
+                    passingRow = [1,2,3,4,5,6,7,8,9].join('');
+
+                return (row === passingRow);
+            };
+
+            const testRows = (board) => board.every(row => isSudokuArrayValid(row));
+
+            const testColumns = (board) => {
+                const gatherColumn = (board, columnNum) => board.reduce((total, row) => [...total, row[columnNum]], []);
+                return [0,1,2,3,4,5,6,7,8].every(i => isSudokuArrayValid(gatherColumn(board, i)));
+            };
+
+            const testSquares = (board) => {
+                const getSquareIndexes = (num) => {
+                    if (num === 1) {
+                        return [0,1,2];
+                    } else if (num === 2) {
+                        return [3,4,5];
+                    } else {
+                        return [6,7,8];
+                    }
+                };
+
+                const getSquareValues = (x, y, board) => {
+                    let values = [],
+                        rows = getSquareIndexes(x),
+                        columns = getSquareIndexes(y);
+
+                    rows.forEach(row => {
+                        columns.forEach(column => {
+                            values.push(board[row][column]);
+                        });
+                    });
+
+                    return values;
+                };
+
+                const squareSections = [1,2,3];
+                return squareSections.every(squareX => {
+                    return squareSections.every(squareY => isSudokuArrayValid(getSquareValues(squareX, squareY, board)));
+                });
+            };
+
+            return (testRows(board) && testColumns(board) && testSquares(board)) ? true : false;
+        };
+        function dtostr(msec) {
+            var hh = Math.floor(msec / 1000 / 60 / 60);
+            msec -= hh * 1000 * 60 * 60;
+            var mm = Math.floor(msec / 1000 / 60);
+            msec -= mm * 1000 * 60;
+            var ss = Math.floor(msec / 1000);
+            msec -= ss * 1000;
+            return hh + ":" + mm + ":" + ss;
+        }
+
+        //DOM&FIREBASE FUNCTIONS
+        function render() {
+            for(let i=0;i<81;i++){
+                document.getElementById(i+1+"").value=state[i];
+                if(locks.includes(i)){
+                    document.getElementById(i+1+"").style.color="red";
+                    document.getElementById(i+1+"").style.background = "linear-gradient(to bottom, rgba(252,234,187,1) 0%, rgba(252,205,77,1) 50%, rgba(248,181,0,1) 51%, rgba(251,223,147,1) 100%)";
+                }else{
+                    document.getElementById(i+1+"").style.color="black";
+                    document.getElementById(i+1+"").style.background = "linear-gradient(to bottom,  rgba(230,240,163,1) 0%,rgba(210,230,56,1) 50%,rgba(195,216,37,1) 51%,rgba(219,240,67,1) 100%)";
+                }
+            }
+        }
+        function upLoad() {
+            ref.set(state.join(""));
+        }
+        function updateState(){
+            state[parseInt(curcell)-1]=curval;
+            upLoad();
+            if(checkSudoku(to_grid(state))){
+                stref.set("finished");
+                sttref.set(Date.now());
+            }
+        }
+        function clearBoard(){
+            ref.set(orig);
+        }
+        function timeIt(){
+            document.getElementById("elapsed").innerText="Time Elapsed: "+dtostr(Date.now()-start);
+        }
+        function showChat(){
+            document.getElementById("chat").style.display = "block";
+        }
+        function hideChat(){
+            document.getElementById("chat").style.display = "none";
+        }
+        function sendChat(){
+            let tr = document.getElementById("message");
+            let bg = tinycolor("<%=pcol%>").isLight()?"#585858":"none";
+            cref.set("<span style='color: <%=pcol%>;background:"+bg+"'><%=pname%></span>:"+tr.value+"<br>");
+            tr.value = "";
+        }
+
+        //NETWORK FUNCTIONS
+        function sendUpdate(){
+            document.getElementById("skipper").innerHTML = "SKIPPING..";
+            document.getElementById("skipper").disable = true;
+            fetch("http://localhost:8162/update<%=lobid%>")
+                .then(function (res) {
+                    document.getElementById("skipper").innerHTML = "SKIP";
+                    document.getElementById("skipper").disable = false;
+            });
+
+        }
+        function sendDelete(){
+            fetch("http://localhost:8162/delete<%=lobid%>")
+                .then(function (res) {
+                    return res;
+                }).then(function (data) {
+                location.href = "http://localhost:8162/lobby.html";
+            })
+        }
+
+        //HANDLERS
+        document.addEventListener("click", function (event) {
+            if (event.target.tagName === 'INPUT') {
+                if (locks.includes(parseInt(curcell) - 1)) {
+                    document.getElementById(curcell).style.color = "red";
+                    document.getElementById(curcell).style.background = "linear-gradient(to bottom, rgba(252,234,187,1) 0%, rgba(252,205,77,1) 50%, rgba(248,181,0,1) 51%, rgba(251,223,147,1) 100%)";
+                } else {
+                    document.getElementById(curcell).style.color = "black";
+                    document.getElementById(curcell).style.background = "linear-gradient(to bottom,  rgba(230,240,163,1) 0%,rgba(210,230,56,1) 50%,rgba(195,216,37,1) 51%,rgba(219,240,67,1) 100%)";
+                }
+                curcell = event.target.id;
+                plref.child("<%=pcol%>").set(event.target.id);
+                console.log("player <%=pname%> set to"+curcell);
+            }
+        });
+        document.addEventListener("keypress", function (event) {
+            if(!locks.includes(parseInt(curcell-1)) && event.key >= '0' && event.key <= '9'){
+                curval = event.key;
+                document.getElementById(curcell).value = event.key;
+                updateState();
+            }else if(event.key==="Enter"){
+                sendChat();
+            }
+        });
+        window.addEventListener("beforeunload", function (e) {
+            plref.child("<%=pcol%>").remove();
+            cref.set("<span style='color: dark grey; font-size:20px'><span style='color: <%=pcol%>'><%= pname %></span> has left the chat</span><br>")
+        });
+    </script>
+</head>
+<body background="https://4.bp.blogspot.com/-dXMb3OIPqiw/UV5pkcbDQhI/AAAAAAAACP0/8hPOunZvj7g/s1600/3.jpg">
+<div class="topnav">
+    <%if(logged){%>
+        <a href="welcome">Welcome, <%=pname%></a>
+        <a href="logout">LogOut</a>
+        <a href="help">Tutorial and FAQ</a>
+        <a class="active" href="lobby">Play with friends</a>
+        <a href="solo">Play Solo</a>
+    <%}else{%>
+        <a href="welcome">Home</a>
+        <a href="login.html">LogIn</a>
+        <a href="signup.html">SignUp</a>
+        <a href="help">Tutorial and FAQ</a>
+        <a href="lobby" class="active">Play Online as Guest</a>
+        <a href="solo">Play Solo as Guest</a>
+    <%}%>
+</div>
+<div id="header">Currently ????? lobbies in play<br>This lobby id:<%=lobid%></div>
+<h1>SUDOKU</h1>
+<div class="board">
+    <table id="grid">
+        <tr><td><input value="0" class="cell" type="button"  id="1"></td>
+            <td><input value="0" class="cell" type="button"  id="2"></td>
+            <td><input value="0" class="cell" type="button"  id="3"></td>
+            <td><input value="0" class="cell" type="button"  id="4"></td>
+            <td><input value="0" class="cell" type="button"  id="5"></td>
+            <td><input value="0" class="cell" type="button"  id="6"></td>
+            <td><input value="0" class="cell" type="button"  id="7"></td>
+            <td><input value="0" class="cell" type="button"  id="8"></td>
+            <td><input value="0" class="cell" type="button"  id="9"></td></tr>
+        <tr><td><input value="0" class="cell" type="button"  id="10"></td>
+            <td><input value="0" class="cell" type="button"  id="11"></td>
+            <td><input value="0" class="cell" type="button"  id="12"></td>
+            <td><input value="0" class="cell" type="button"  id="13"></td>
+            <td><input value="0" class="cell" type="button"  id="14"></td>
+            <td><input value="0" class="cell" type="button"  id="15"></td>
+            <td><input value="0" class="cell" type="button"  id="16"></td>
+            <td><input value="0" class="cell" type="button"  id="17"></td>
+            <td><input value="0" class="cell" type="button"  id="18"></td></tr>
+        <tr><td><input value="0" class="cell" type="button"  id="19"></td>
+            <td><input value="0" class="cell" type="button"  id="20"></td>
+            <td><input value="0" class="cell" type="button"  id="21"></td>
+            <td><input value="0" class="cell" type="button"  id="22"></td>
+            <td><input value="0" class="cell" type="button"  id="23"></td>
+            <td><input value="0" class="cell" type="button"  id="24"></td>
+            <td><input value="0" class="cell" type="button"  id="25"></td>
+            <td><input value="0" class="cell" type="button"  id="26"></td>
+            <td><input value="0" class="cell" type="button"  id="27"></td></tr>
+        <tr><td><input value="0" class="cell" type="button"  id="28"></td>
+            <td><input value="0" class="cell" type="button"  id="29"></td>
+            <td><input value="0" class="cell" type="button"  id="30"></td>
+            <td><input value="0" class="cell" type="button"  id="31"></td>
+            <td><input value="0" class="cell" type="button"  id="32"></td>
+            <td><input value="0" class="cell" type="button"  id="33"></td>
+            <td><input value="0" class="cell" type="button"  id="34"></td>
+            <td><input value="0" class="cell" type="button"  id="35"></td>
+            <td><input value="0" class="cell" type="button"  id="36"></td></tr>
+        <tr><td><input value="0" class="cell" type="button"  id="37"></td>
+            <td><input value="0" class="cell" type="button"  id="38"></td>
+            <td><input value="0" class="cell" type="button"  id="39"></td>
+            <td><input value="0" class="cell" type="button"  id="40"></td>
+            <td><input value="0" class="cell" type="button"  id="41"></td>
+            <td><input value="0" class="cell" type="button"  id="42"></td>
+            <td><input value="0" class="cell" type="button"  id="43"></td>
+            <td><input value="0" class="cell" type="button"  id="44"></td>
+            <td><input value="0" class="cell" type="button"  id="45"></td></tr>
+        <tr><td><input value="0" class="cell" type="button"  id="46"></td>
+            <td><input value="0" class="cell" type="button"  id="47"></td>
+            <td><input value="0" class="cell" type="button"  id="48"></td>
+            <td><input value="0" class="cell" type="button"  id="49"></td>
+            <td><input value="0" class="cell" type="button"  id="50"></td>
+            <td><input value="0" class="cell" type="button"  id="51"></td>
+            <td><input value="0" class="cell" type="button"  id="52"></td>
+            <td><input value="0" class="cell" type="button"  id="53"></td>
+            <td><input value="0" class="cell" type="button"  id="54"></td></tr>
+        <tr><td><input value="0" class="cell" type="button"  id="55"></td>
+            <td><input value="0" class="cell" type="button"  id="56"></td>
+            <td><input value="0" class="cell" type="button"  id="57"></td>
+            <td><input value="0" class="cell" type="button"  id="58"></td>
+            <td><input value="0" class="cell" type="button"  id="59"></td>
+            <td><input value="0" class="cell" type="button"  id="60"></td>
+            <td><input value="0" class="cell" type="button"  id="61"></td>
+            <td><input value="0" class="cell" type="button"  id="62"></td>
+            <td><input value="0" class="cell" type="button"  id="63"></td></tr>
+        <tr><td><input value="0" class="cell" type="button"  id="64"></td>
+            <td><input value="0" class="cell" type="button"  id="65"></td>
+            <td><input value="0" class="cell" type="button"  id="66"></td>
+            <td><input value="0" class="cell" type="button"  id="67"></td>
+            <td><input value="0" class="cell" type="button"  id="68"></td>
+            <td><input value="0" class="cell" type="button"  id="69"></td>
+            <td><input value="0" class="cell" type="button"  id="70"></td>
+            <td><input value="0" class="cell" type="button"  id="71"></td>
+            <td><input value="0" class="cell" type="button"  id="72"></td></tr>
+        <tr><td><input value="0" class="cell" type="button"  id="73"></td>
+            <td><input value="0" class="cell" type="button"  id="74"></td>
+            <td><input value="0" class="cell" type="button"  id="75"></td>
+            <td><input value="0" class="cell" type="button"  id="76"></td>
+            <td><input value="0" class="cell" type="button"  id="77"></td>
+            <td><input value="0" class="cell" type="button"  id="78"></td>
+            <td><input value="0" class="cell" type="button"  id="79"></td>
+            <td><input value="0" class="cell" type="button"  id="80"></td>
+            <td><input value="0" class="cell" type="button"  id="81"></td></tr>
+    </table>
+</div>
+<div class="controls" id="controller">
+    <h1 id="elapsed">Time Elapsed: 0:0:0</h1>
+    <button onclick="clearBoard()">CLEAR</button>
+    <br>
+    <button onclick="sendUpdate()" id="skipper">SKIP</button>
+    <br>
+    <button onclick="sendDelete()">DELETE LOBBY</button>
+    <br>
+    <button onclick="showChat()">CHAT</button>
+</div>
+<div id="hidden">
+    <h1 id="fin"></h1>
+    CHOOSE NEXT:
+    <div id="difficulties">
+        <button id="easy">easy</button>
+        <button id="medium">medium</button>
+        <button id="hard">hard</button>
+    </div>
+</div>
+<div class="chat-popup" id="chat">
+    <h2>Chat</h2>
+    <div id="chatboard"></div>
+    <br>
+    <textarea placeholder="Type message.." id="message" required></textarea>
+    <br>
+    <div id="chatcontrols">
+        <button id="send" onclick="sendChat()">Send</button>
+        <button id="close" onclick="hideChat()">Close</button>
+    </div>
+</div>
+</body>
+<script>
+    document.getElementById("difficulties").addEventListener("click",function (event) {
+        if(event.target.tagName === "BUTTON"){
+            fetch("http://localhost:8162/update<%=lobid%>"+event.target.id);
+        }
+    });
+</script>
+</html>

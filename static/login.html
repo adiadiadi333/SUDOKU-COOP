@@ -1,0 +1,153 @@
+<!DOCTYPE html> 
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>SUDOKU-COOP LOGIN</title>
+		<link href="notes.css" rel="stylesheet" type="text/css">
+		<link rel="stylesheet" href="nav.css"/>
+		<style>
+			*{
+				font-size: 25px;
+				font-weight: 400;
+				font-family: Georgia, serif;
+			}
+			#fakeform {
+				margin-left: 10%;
+				margin-right: 10%;
+				border:2px solid #ccc800;
+			}
+			input[type=text],
+			input[type=password] {
+				width: 100%;
+				padding: 12px 20px;
+				margin: 8px 0;
+				display: inline-block;
+				border: 2px solid #c600cc;
+				box-sizing: border-box;
+			}
+			h1{
+				background: linear-gradient(to bottom, rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
+				text-align:center;
+				text-decoration: none solid rgb(68, 68, 68);
+				font-size: 40px;
+				letter-spacing: 3.8px;
+				word-spacing: 5.6px;
+				color: #000000;
+				text-transform: none;
+			}
+			button {
+				background: linear-gradient(to bottom, rgba(157,213,58,1) 0%,rgba(161,213,79,1) 50%,rgba(128,194,23,1) 51%,rgba(124,188,10,1) 100%);
+				padding: 15px 20px;
+				margin: 8px 0;
+				cursor: pointer;
+				width: 100%;
+				color:#ffffff;
+				font-family: Georgia, serif;
+				font-size:28px;
+				font-style: italic;
+				font-variant: small-caps;
+				font-weight: 400;
+				text-decoration:none;
+			}
+			button:hover {
+				background: linear-gradient(to bottom, rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%);
+				color: black;
+			}
+
+			.reset {
+				width: 100%;
+				padding: 15px 20px;
+				background: linear-gradient(to bottom, rgba(248,80,50,1) 0%,rgba(241,111,92,1) 50%,rgba(246,41,12,1) 51%,rgba(240,47,23,1) 71%,rgba(231,56,39,1) 100%);
+			}
+			.container {
+				padding: 16px;
+			}
+		</style>
+		<script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+		<script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-database.js"></script>
+	</head>
+	<body background="https://4.bp.blogspot.com/-dXMb3OIPqiw/UV5pkcbDQhI/AAAAAAAACP0/8hPOunZvj7g/s1600/3.jpg">
+		<div class="topnav">
+			<a href="welcome">Home</a>
+			<a href="login.html" class="active">LogIn</a>
+			<a href="signup.html">SignUp</a>
+			<a href="help">Tutorial and FAQ</a>
+			<a href="lobby">Play Online as Guest</a>
+			<a href="solo">Play Solo as Guest</a>
+		</div>
+		<h1>SUDOKU LOGIN</h1>
+		<div id="fakeform">
+			<div class="container">
+				<label><b>Username</b></label>
+				<input type="text" placeholder="Enter Username" id="username" required>
+
+				<label><b>Password</b></label>
+				<input type="password" placeholder="Enter Password" id="psw" required>
+
+				<label><span class="error" id="invalidp">Incorrect Password!</span></label>
+				<label><span class="error" id="invalidu">Incorrect Username!</span></label>
+				<button id="login">Login</button>
+				<input type="checkbox" checked="checked"> Remember me
+				<button class="reset">Reset Password</button>
+			</div>
+		</div>
+	</body>
+	<script>
+		// Your web app's Firebase configuration
+		const firebaseConfig = {
+			apiKey: "AIzaSyB9Gj86aRbyt-Xqla7xCJJxPDl_Uz0FTqA",
+			authDomain: "sudoku-333.firebaseapp.com",
+			databaseURL: "https://sudoku-333.firebaseio.com",
+			projectId: "sudoku-333",
+			storageBucket: "sudoku-333.appspot.com",
+			messagingSenderId: "631668838127",
+			appId: "1:631668838127:web:487a428a1958e27f7b551a",
+			measurementId: "G-6KJBJVDGC8"
+		};
+		// Initialize Firebase
+		firebase.initializeApp(firebaseConfig);
+
+		var uref = firebase.database().ref("accounts");
+
+		let u = document.getElementById("username");
+		let p = document.getElementById("psw");
+		function  clearer(){
+			document.getElementById("invalidp").style.display = "none";
+			document.getElementById("invalidu").style.display = "none";
+		}
+		u.onclick = clearer();
+		p.onclick = clearer();
+
+		document.getElementById("login").onclick = function () {
+			if(u.value===""){
+				document.getElementById("invalidu").style.display = "block";
+				return;
+			}
+			uref.once("value").then(function (snap) {
+				if(snap.child(u.value).exists()){
+					console.log("found");
+					if(snap.child(u.value).child("password").val()===p.value){
+						//window.open("http://localhost:8162/welcome"+u.value,"_self");
+						const options = {
+							method:"POST",
+							headers:{'Content-Type':'text/plain'},
+							body:u.value
+						};
+						fetch("http://localhost:8162/welcome",options)
+								.then(function (res) {
+									if (res.redirected) {window.location.href = res.url;}
+								});
+					}else{
+						p.value = "";
+						document.getElementById("invalidp").style.display = "block";
+						document.getElementById("invalidu").style.display = "none";
+					}
+				}else{
+					u.value = "";
+					document.getElementById("invalidu").style.display = "block";
+					document.getElementById("invalidp").style.display = "none";
+				}
+			});
+		}
+	</script>
+</html>

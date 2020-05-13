@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>SUDOKU-COOP SIGNUP</title>
+        <link href="notes.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="nav.css"/>
+        <style>
+            *{
+                font-size: 20px;
+                font-weight: 400;
+                font-family: Georgia, serif;
+            }
+            .fakeform{
+                margin-left: 10%;
+                margin-right: 10%;
+            }
+            h1{
+                background: linear-gradient(to bottom, rgba(255,255,255,1) 0%,rgba(255,255,255,0) 100%);
+                text-align:center;
+                text-decoration: none solid rgb(68, 68, 68);
+                font-size: 40px;
+                letter-spacing: 3.8px;
+                word-spacing: 5.6px;
+                color: #000000;
+                text-transform: none;
+            }
+            input[type=text],
+            input[type=password] {
+                width: 100%;
+                padding: 12px 20px;
+                margin: 8px 0;
+                display: inline-block;
+                border: 2px solid #c600cc;
+                box-sizing: border-box;
+            }
+
+            button {
+                background: linear-gradient(to bottom, rgba(157,213,58,1) 0%,rgba(161,213,79,1) 50%,rgba(128,194,23,1) 51%,rgba(124,188,10,1) 100%);
+                padding: 15px 20px;
+                margin: 8px 0;
+                cursor: pointer;
+                width: 100%;
+                color:#ffffff;
+                font-family: Georgia, serif;
+                font-size:28px;
+                font-style: italic;
+                font-variant: small-caps;
+                font-weight: 400;
+                text-decoration:none;
+            }
+            button:hover{
+                background: linear-gradient(to bottom, rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 51%,rgba(254,254,254,1) 100%);
+                color: black;
+            }
+            #clear{
+                padding: 15px 20px;
+                background: linear-gradient(to bottom, rgba(248,80,50,1) 0%,rgba(241,111,92,1) 50%,rgba(246,41,12,1) 51%,rgba(240,47,23,1) 71%,rgba(231,56,39,1) 100%);
+            }
+            #clear,#signup {
+                float: left;
+                width: 50%;
+            }
+
+            .container {
+                padding: 16px;
+            }
+
+        </style>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-app.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.9.1/firebase-database.js"></script>
+    </head>
+    <body background="https://4.bp.blogspot.com/-dXMb3OIPqiw/UV5pkcbDQhI/AAAAAAAACP0/8hPOunZvj7g/s1600/3.jpg">
+    <div class="topnav">
+        <a href="welcome">Home</a>
+        <a href="login.html">LogIn</a>
+        <a href="signup.html" class="active">SignUp</a>
+        <a href="help">Tutorial and FAQ</a>
+        <a href="lobby">Play Online as Guest</a>
+        <a href="solo">Play Solo as Guest</a>
+    </div>
+    <h1>SUDOKU SIGN-UP</h1>
+        <div class="fakeform" style="border:2px solid #ccc800">
+            <div class="container">
+                <label><b>Username</b></label>
+                <input type="text" placeholder="Enter Desired Username" id="username" required>
+                <label><span class="error" id="duplicate_uname">Username already exists!</span></label>
+                <label><span class="success" id="uname">Username is available</span></label>
+
+                <label><b>Email</b></label>
+                <input type="text" placeholder="Enter Email" id="email" required>
+                <label><span class="error" id="duplicate_email">Email already exists!</span></label>
+                <label><span class="error" id="invalid_email">Email is invalid!</span></label>
+                <label><span class="success" id="email_s">Email is valid</span></label>
+
+                <label><b>Password</b></label>
+                <input type="password" placeholder="Enter Password" id="psw"
+                 title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+                 required>
+                <label><span class="error" id="password">Password is invalid!</span></label>
+                <label><span class="success" id="psw_s">Password is valid</span></label>
+
+                <label><b>Repeat Password</b></label>
+                <input type="password" placeholder="Repeat Password" id="psw-repeat" required>
+                <label><span class="error" id="psw_mismatch">Passwords do not match!</span></label>
+
+                <input type="checkbox" checked="checked"> Remember me
+                <p>To create an account you have to agree our <a href="#">Terms & Privacy</a>.</p>
+
+                <div class="clearfix">
+                    <label><span class="warning" id="invalid">Make sure all fields are valid!</span></label>
+                    <label><span class="success" id="valid">Account is created</span></label>
+                    <button id="clear">Clear</button>
+                    <button id="signup">Sign Up</button>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB9Gj86aRbyt-Xqla7xCJJxPDl_Uz0FTqA",
+            authDomain: "sudoku-333.firebaseapp.com",
+            databaseURL: "https://sudoku-333.firebaseio.com",
+            projectId: "sudoku-333",
+            storageBucket: "sudoku-333.appspot.com",
+            messagingSenderId: "631668838127",
+            appId: "1:631668838127:web:487a428a1958e27f7b551a",
+            measurementId: "G-6KJBJVDGC8"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        //GLOBAL VARIABLES
+        let validUser = false;
+        let validEmail = false;
+        let u = document.getElementById("username");
+        let e = document.getElementById("email");
+        let p = document.getElementById("psw");
+        let p2 = document.getElementById("psw-repeat");
+        var uref = firebase.database().ref("accounts");
+
+        //UTILITY FUNCTIONS
+        function validateEmail(email) {
+            let re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
+        }
+        function validatePass(psw) {
+            return (
+                psw.match(/[a-z]/g) &&
+                psw.match(/[A-Z]/g) &&
+                psw.match(/[0-9]/g) &&
+                psw.length>=8
+            );
+        }
+
+        //HANDLERS
+        u.oninput = function () {
+            console.log("checking uname");
+            if(u.value===""){
+                document.getElementById("duplicate_uname").style.display = "none";
+                document.getElementById("uname").style.display = "none";
+                validUser = false;
+                return;
+            }
+            uref.once("value").then(function (snap) {
+                if(snap.hasChild(u.value)){
+                    document.getElementById("duplicate_uname").style.display = "block";
+                    document.getElementById("uname").style.display = "none";
+                    validUser = false;
+                }else{
+                    document.getElementById("duplicate_uname").style.display = "none";
+                    document.getElementById("uname").style.display = "block";
+                    validUser = true;
+                }
+            });
+        };
+        e.oninput = function () {
+            if(!validateEmail(e.value)){
+                document.getElementById("invalid_email").style.display = (e.value==="")?"none":"block";
+                document.getElementById("duplicate_email").style.display = "none";
+                document.getElementById("email_s").style.display = "none";
+                validEmail = false;
+                return;
+            }else{
+                document.getElementById("invalid_email").style.display = "none";
+                document.getElementById("email_s").style.display = "block";
+            }
+            console.log("checking email");
+            var duprefs = uref.orderByChild("email").equalTo(e.value);
+            duprefs.once("value").then(function (snap) {
+                if(snap.exists()){
+                    document.getElementById("duplicate_email").style.display = "block";
+                    document.getElementById("email_s").style.display = "none";
+                    validEmail = false;
+                }else{
+                    validEmail = true;
+                    document.getElementById("duplicate_email").style.display = "none";
+                    document.getElementById("email_s").style.display = "block";
+                }
+            });
+        };
+        p.oninput = function () {
+            if(!validatePass(p.value)){
+                document.getElementById("password").style.display = (p.value==="")?"none":"block";
+                document.getElementById("psw_s").style.display = "none";
+            }else{
+                document.getElementById("psw_s").style.display = "block";
+                document.getElementById("password").style.display = "none";
+            }
+            console.log("checking password");
+        };
+        p2.oninput = function () {
+            if(p2.value === p.value){
+                document.getElementById("psw_mismatch").style.display = "none";
+            }else{
+                document.getElementById("psw_mismatch").style.display = "block";
+            }
+            console.log("checking password");
+        };
+        document.getElementById("signup").onclick = function SendUser() {
+            if(!(validUser&&validEmail&&validatePass(p.value)&&(p.value===p2.value))){
+                document.getElementById("invalid").style.display="block";
+                document.getElementById("valid").style.display="none";
+                return;
+            }else{
+                uref.child(u.value).set({'email':e.value,'password':p.value});
+                document.getElementById("invalid").style.display="none";
+                document.getElementById("valid").style.display="block";
+            }
+        };
+        document.getElementById("clear").onclick = function () {
+            u.value = "";
+            e.value = "";
+            p.value = "";
+            p2.value = "";
+            let ers = document.getElementsByTagName("span");
+            for(let i=0;i<ers.length;i++){
+                ers[i].style.display = "none";
+            }
+        }
+    </script>
+</html> 
